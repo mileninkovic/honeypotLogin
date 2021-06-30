@@ -5,13 +5,12 @@ const url = 'mongodb://161.35.86.131:27017/userdb';
 const app = express();
 
 app.use(express.urlencoded({extended: false}));
-//app.use(express.json()) // To parse the incoming requests with JSON payloads
 
 app.get('/', (req, res) => {
     const timeNow = new Date();
     const shrtTime = timeNow.getDate() + "/" + parseInt(timeNow.getMonth()+1) + "/" + timeNow.getFullYear() + " " + timeNow.getHours() + ":" + timeNow.getMinutes() + ":" + timeNow.getSeconds();
+    
     MongoClient.connect(url, {useNewUrlParser: true, useUnifiedTopology: true}, (err, db) => {
-        console.log("Established DB connection!");
         if (err) throw err;
         const dbo = db.db("requests");
         dbo.collection("time").insertOne({ip: requestIp.getClientIp(req), time: shrtTime, ua: req.headers['user-agent'], method: req.method}, function(err, res) {
@@ -19,16 +18,17 @@ app.get('/', (req, res) => {
             db.close();
         });
     })
+    
     res.sendFile(__dirname + '/static/login.html');
 });
 
 app.post('/', (req, res) => {
     const timeNow = new Date();
     const shrtTime = timeNow.getDate() + "/" + parseInt(timeNow.getMonth()+1) + "/" + timeNow.getFullYear() + " " + timeNow.getHours() + ":" + timeNow.getMinutes() + ":" + timeNow.getSeconds();
-    let username = req.body.username;
-    let password = req.body.password;
+    const username = req.body.username;
+    const password = req.body.password;
+    
     MongoClient.connect(url, {useNewUrlParser: true, useUnifiedTopology: true}, (err, db) => {
-        console.log("Established DB connection!");
         if (err) throw err;
         const dbo = db.db("requests");
         dbo.collection("loginAttempt").insertOne({userName: username, password: password, ip: requestIp.getClientIp(req), time: shrtTime, ua: req.headers['user-agent'], method: req.method}, function(err, res) {
@@ -36,6 +36,7 @@ app.post('/', (req, res) => {
             db.close();
         });
     })
+    
     res.sendFile(__dirname + '/static/login.html');
   });
 
